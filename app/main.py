@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .config import settings
@@ -111,6 +112,19 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 @app.get("/health")
 def health() -> dict[str, bool]:
     return {"ok": True}
+
+
+@app.get("/health/db")
+def health_db(db: Session = Depends(get_db)) -> dict[str, object]:
+    try:
+        row = db.execute(text("SELECT 1")).scalar_one()
+    except Exception as exc:  # noqa: BLE001
+        _log_event("db_health_failed", error=str(exc))
+        raise HTTPException(
+            status_code=503,
+            detail={"error": "DATABASE_UNAVAILABLE", "message": "Database health check failed"},
+        ) from exc
+    return {"ok": True, "db": row}
 
 
 @app.post(

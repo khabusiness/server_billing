@@ -5,6 +5,7 @@ Unified backend for Android subscription verification via Google Play Developer 
 - Domain (target): `billing.rus-bridge.ru`
 - Endpoint: `POST /v1/billing/android/verify`
 - Healthcheck: `GET /health`
+- DB healthcheck: `GET /health/db`
 - Stack: FastAPI + PostgreSQL (Railway)
 
 ## 1. What it does
